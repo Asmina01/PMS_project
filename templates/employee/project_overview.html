@@ -1,0 +1,162 @@
+{% extends 'employee/employee_dashboard.html' %}
+{% load static %}
+{% block content %}
+<body>
+    <div class="container mt-2">
+        <!-- Header Section -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header text-black d-flex align-items-center" style="background-color:#eaeaea; height:130px">
+                 <div>
+                    <h4 class="mb-0">{{ project.name }}</h4><br>
+                    <p class="mb-0 small">Start Date: {{ project.start_date }}  |  Due Date: {{ project.due_date }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Section -->
+        <div class="row">
+            <!-- Left Column -->
+            <div class="col-md-8">
+                <!-- Description Section -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header">
+                        <h6 class="mb-0">Description</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="small">{{ project.description }}</p>
+                    </div>
+                </div>
+
+                <!-- Details Section -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header">
+                        <h6 class="mb-0">Details</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between text-center">
+                            <!-- Start Date -->
+                            <div>
+                                <div class="icon-circle bg-primary text-white mb-2 mx-auto">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <p class="mb-0 font-weight-bold">Start Date</p>
+                                <p class="text-muted small">{{ project.start_date }}</p>
+                            </div>
+
+                            <!-- End Date -->
+                            <div>
+                                <div class="icon-circle bg-success text-white mb-2 mx-auto">
+                                    <i class="fas fa-flag-checkered"></i>
+                                </div>
+                                <p class="mb-0 font-weight-bold">End Date</p>
+                                <p class="text-muted small">{{ project.due_date }}</p>
+                            </div>
+
+                            <!-- Progress -->
+                            <div>
+                                <div class="icon-circle bg-info text-white mb-2 mx-auto">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <p class="mb-0 font-weight-bold">Progress</p>
+                                <p class="text-muted small">{{ project.progress }}%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comments Section -->
+ <!-- Comments Section -->
+<div class="card mb-4 shadow-sm">
+    <div class="card-header">
+        <h6 class="mb-0">Comments</h6>
+    </div>
+    <div class="card-body">
+        {% for comment in comments %}
+            <div class="mb-3">
+                <h6 class="mb-1">{{ comment.user.username }}</h6>  <!-- Ensure the username is displayed -->
+                <p class="mb-0 small">{{ comment.content }}</p>
+                <small class="text-muted">{{ comment.created_at }}</small>
+            </div>
+        {% empty %}
+            <p class="text-muted small">No comments yet. Be the first to comment!</p>
+        {% endfor %}
+
+        <!-- Comment Form -->
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group mt-3">
+                {{ form.content }}  <!-- Render the form field for content -->
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm mt-2">Submit</button>
+        </form>
+    </div>
+</div></div>
+
+            <!-- Right Column -->
+            <div class="col-md-4">
+                <!-- Members Section -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header">
+                        <h6 class="mb-0">Assigned Members</h6>
+                    </div>
+                    <div class="card-body">
+                        {% for member in project.assigned.all %}
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="{{ member.image.url }}" alt="{{ member.name }}"
+                                     class="rounded-circle border mr-3" style="width: 60px; height: 50px;">&nbsp;
+                                <span>{{ member.name }}</span>
+                            </div>
+                        {% empty %}
+                            <p class="text-muted small">No members assigned yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Project Progress Section -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header">
+                        <h6 class="mb-0">Project Progress</h6>
+                    </div>
+                    <div class="card-body" style="height:180px;">
+                        <div class="d-flex justify-content-center">
+                            <div class="progress-circle" style="width: 150px; height: 140px;">
+                                <svg viewBox="0 0 36 36">
+                                    <path
+                                        class="circle-bg"
+                                        d="M18 2.0845
+                                            a 15.9155 15.9155 0 0 1 0 31.831
+                                            a 15.9155 15.9155 0 0 1 0 -31.831"
+                                        fill="none"
+                                        stroke="#e0e0e0"
+                                        stroke-width="2"
+                                    />
+                                    <path
+                                        class="circle"
+                                        d="M18 2.0845
+                                            a 15.9155 15.9155 0 0 1 0 31.831
+                                            a 15.9155 15.9155 0 0 1 0 -31.831"
+                                        fill="none"
+                                        stroke="#007bff"
+                                        stroke-width="2"
+                                        stroke-dasharray="{{ project.progress }}, 100"
+                                    />
+                                </svg>
+                                <div class="progress-value text-center">
+                                    <h4>{{ project.progress }}%</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-5 py-3" style="background-color: #eaeaea;">
+            <div class="container text-center">
+                <p class="mb-0 small">Project Overview - © 2025</p>
+            </div>
+        </footer>
+    </div>
+</body>
+{% endblock %}
