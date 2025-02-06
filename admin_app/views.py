@@ -46,10 +46,10 @@ def admin_assigned_projects(request):
 
     search_query = request.GET.get('search', '')
 
-    # Start with all projects
+   
     projects = Project.objects.all()
 
-    # Apply filters if provided
+    # Applying filters 
     if status_filter:
         projects = projects.filter(status=status_filter)
     if priority_filter:
@@ -70,13 +70,13 @@ def admin_assigned_projects(request):
     # Apply search filter
     if search_query:
         projects = projects.filter(
-            Q(name__icontains=search_query) |  # Search in project name
-            Q(assigned__name__icontains=search_query)  # Search in assigned employee's name
+            Q(name__icontains=search_query) |  # Search project name
+            Q(assigned__name__icontains=search_query)  # Search assigned employee's name
         ).distinct()
 
     clients = Project.objects.values_list('client', flat=True).distinct()
 
-    # Pass current filters to the template for maintaining state
+ 
     context = {
         'projects': projects,
         'total_projects': total_projects,
@@ -113,8 +113,8 @@ def create_project(request):
     if request.method == 'POST':
         form = ProjectForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()  # This will save the project along with the selected members
-            return redirect('admin_assigned_projects')  # Redirect to a success page or project list
+            form.save() 
+            return redirect('admin_assigned_projects')
     else:
         form = ProjectForm()
 
@@ -169,12 +169,12 @@ def base(request):
     return render(request, 'base.html', context)
 def add_member(request):
     if request.method == 'POST':
-        form = UserForm(request.POST, request.FILES)  # Include request.FILES for handling file uploads
+        form = UserForm(request.POST, request.FILES)  
         if form.is_valid():
-            form.save()  # Save the form data
-            return redirect('members_list')  # Redirect to member list view
+            form.save()  
+            return redirect('members_list')  
         else:
-            print(form.errors)  # Add this line to print form errors if it's not valid
+            print(form.errors)  
     else:
         form = UserForm()
 
@@ -182,11 +182,11 @@ def add_member(request):
 
 
 def members_list(request):
-    members = user.objects.all()  # Fetch all members from the database
+    members = user.objects.all()
     return render(request, 'members_list.html', {'members': members})
 
 def project_list(request):
-    projects = Project.objects.all()  # Fetch all projects from the database
+    projects = Project.objects.all() 
     return render(request, 'project_list.html', {'projects': projects})
 
 
@@ -203,9 +203,9 @@ def project_overview(request, project_id):
 
 
 def task_list(request):
-    tasks = Task.objects.all()  # Fetch all tasks
+    tasks = Task.objects.all()  
 
-    # Get filter and search values from the request
+    # filter
     status_filter = request.GET.get('status', '')
     category_filter = request.GET.get('category', '')
     priority_filter = request.GET.get('priority', '')
@@ -237,19 +237,19 @@ def task_list(request):
         tasks = tasks.filter(estimated_hours__gte=estimated_hours_filter)
 
     # Calculate time spent on tasks
-    total_company_seconds = 0  # Variable to store total company time
+    total_company_seconds = 0  
 
     for task in tasks:
         total_seconds = sum((entry.stop_time - entry.start_time).total_seconds()
                             for entry in task.task_times.all() if entry.start_time and entry.stop_time)
         task.total_hours = int(total_seconds // 3600)
         task.total_minutes = int((total_seconds % 3600) // 60)
-        total_company_seconds += total_seconds  # Add to total time spent by all employees
+        total_company_seconds += total_seconds 
 
         completed_time = task.task_times.filter(stop_time__isnull=False).order_by('-stop_time').first()
         task.completed_time_display = completed_time.stop_time if completed_time else None
 
-    # Convert total time spent by all employees
+    
 
 
     return render(request, 'task_list.html', {
@@ -267,9 +267,9 @@ def task_list(request):
     })
 
 def delete_member(request, reg_no):
-    member = get_object_or_404(user, reg_no=reg_no)  # Get member by reg_no
+    member = get_object_or_404(user, reg_no=reg_no)  
     if request.method == 'POST':
-        member.delete()  # Delete the member
+        member.delete() 
         return redirect('members_list')
 
 
@@ -277,8 +277,8 @@ def delete_project(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
     if request.method == 'POST':
         project.delete()
-        return redirect('admin_assigned_projects')  # Redirect after deletion
-    return redirect('admin_assigned_projects')  # Fallback redirect
+        return redirect('admin_assigned_projects') 
+    return redirect('admin_assigned_projects') 
 
 
 def progress_page(request):
@@ -288,7 +288,7 @@ def progress_page(request):
     for project in projects:
         tasks = project.tasks.all()
 
-        # Calculate project progress as the average of all task progress
+        
         total_progress = 0
         total_tasks = tasks.count()
         pending_tasks = tasks.filter(status='Pending').count()
@@ -299,11 +299,11 @@ def progress_page(request):
             if task.status == 'Completed':
                 total_progress += 100
             elif task.status == 'In Progress':
-                total_progress += 60  # assuming 60% for tasks in progress
+                total_progress += 60  
             else:
-                total_progress += 0  # Pending tasks have 0% progress
+                total_progress += 0  
 
-        project_progress = total_progress / total_tasks if total_tasks else 0  # Average task progress
+        project_progress = total_progress / total_tasks if total_tasks else 0 
 
         project_data.append({
             'project_name': project.name,
@@ -313,21 +313,20 @@ def progress_page(request):
             'pending_tasks': pending_tasks,
             'in_progress_tasks': in_progress_tasks,
             'completed_tasks': completed_tasks,
-            'tasks': tasks  # Include tasks for detailed progress view
+            'tasks': tasks 
         })
 
     return render(request, 'progress_page.html', {'project_data': project_data})
 
 def backlog_list(request):
-    # Filter tasks: High priority and Pending
-    # Filter tasks: High priority and Pending
+   
     high_priority_pending_tasks = Task.objects.filter( status='Pending').order_by('-start_date')
 
-    # Get the most recent tasks (ordered by start_date)
-    recent_tasks = Task.objects.all().order_by('-start_date')[:5]  # Adjust the limit as needed
+   
+    recent_tasks = Task.objects.all().order_by('-start_date')[:5]  
     backlog_tasks=Task.objects.filter(status="Backlog")
 
-    # Pass tasks to the template
+    
     return render(request, 'backlog_list.html', {
         'high_priority_pending_tasks': high_priority_pending_tasks,
         'recent_tasks': recent_tasks,
@@ -353,7 +352,7 @@ def sprint_detail(request, sprint_id):
     sprint = get_object_or_404(Sprint, id=sprint_id)
     sprints = Sprint.objects.all()
 
-    # Categorize tasks by status for the selected sprint
+   
     pending_tasks = sprint.tasks.filter(status='Pending')
     in_progress_tasks = sprint.tasks.filter(status='In Progress')
     completed_tasks = sprint.tasks.filter(status='Completed')
@@ -378,11 +377,10 @@ def add_task_to_sprint(request):
             messages.error(request, "All fields are required.")
             return redirect('sprint_dashboard')
 
-        # Fetch the task and sprint objects
+      
         task = get_object_or_404(Task, id=task_id)
         sprint = get_object_or_404(Sprint, id=sprint_id)
 
-        # Check the task's current status and assign it accordingly
         if task.status == "In Progress":
             sprint.in_progress_tasks.add(task)
         elif task.status == "Completed":
@@ -391,7 +389,7 @@ def add_task_to_sprint(request):
             sprint.pending_tasks.add(task)
             task.status = "Pending"
 
-        # Add the task to the sprint (will update the sprint's task list)
+      
         sprint.tasks.add(task)
         task.save()
 
@@ -428,20 +426,20 @@ def login(request):
             password = form.cleaned_data['password']
 
             try:
-                user_instance = user.objects.get(reg_no=reg_no)  # Get user by reg_no
+                user_instance = user.objects.get(reg_no=reg_no)  
 
                 # Check password
-                if user_instance.check_password(password):  # Verify hashed password
-                    request.session['user_reg_no'] = user_instance.reg_no  # Store session
+                if user_instance.check_password(password):  
+                    request.session['user_reg_no'] = user_instance.reg_no  
 
-                    # Log the user in using Django's built-in auth_login method
+                 
                     auth_login(request, user_instance)
 
-                    # Redirect to the appropriate dashboard based on role
+                    
                     if user_instance.role == 'admin':
-                        return redirect('admin_dashboard')  # Redirect to admin dashboard
+                        return redirect('admin_dashboard') 
                     elif user_instance.role == 'employee':
-                        return redirect('baseuser')  # Redirect to employee dashboard
+                        return redirect('baseuser')  
                 else:
                     return render(request, 'login.html', {'form': form, 'error': 'Invalid credentials'})
 
