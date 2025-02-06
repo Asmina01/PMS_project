@@ -28,7 +28,7 @@
               <td>
                 {% for employee in task.assigned_to.all %}
                   <img src="{{ employee.image.url }}" alt="{{ employee.name }}" style="width: 30px; height: 30px; border-radius: 50%; margin-right: 5px;">
-                  {{ employee.name }}  <!-- Replace with appropriate field -->
+                  {{ employee.name }} 
                 {% empty %}
                   No employee assigned
                 {% endfor %}
@@ -68,7 +68,7 @@
               <td>
                 {% for employee in task.assigned_to.all %}
                   <img src="{{ employee.image.url }}" alt="{{ employee.name }}" style="width: 30px; height: 30px; border-radius: 50%; margin-right: 5px;">
-                  {{ employee.name }}  <!-- Replace with appropriate field -->
+                  {{ employee.name }}  
                 {% empty %}
                   No employee assigned
                 {% endfor %}
