@@ -17,11 +17,11 @@ from employee_app.models import TaskTime
 def task_details(request, task_id):
     task = get_object_or_404(Task, id=task_id)
 
-    # Get the latest time entry for the task
+    
     task_time = task.times.last() if task.times.exists() else None
 
     if task_time:
-        # Calculate time spent if the task is completed
+        
         if task_time.stop_time:
             time_spent = task_time.stop_time - task_time.start_time
         else:
@@ -39,25 +39,25 @@ def update_task(request, task_id):
     if request.method == 'POST':
         # Check if the timer is being started
         if 'start_time' in request.POST:
-            if task.status == "Pending":  # Automatically change status to "In Progress" if it's pending
+            if task.status == "Pending": 
                 task.status = "In Progress"
 
-        # Handle the status update
+        # Handling the status update
         if 'status' in request.POST:
             new_status = request.POST['status']
-            if new_status == "Completed" and task.status != "Completed":  # Only update if it's being completed now
-                # Save current timestamp when task is completed in TaskTime model
+            if new_status == "Completed" and task.status != "Completed":  
+               
                 TaskTime.objects.create(
                     task=task,
-                    stop_time=timezone.now()  # Store the current timestamp as the stop_time
+                    stop_time=timezone.now()  
                 )
             task.status = new_status
 
-        # Handle the timer data (start_time and stop_time)
+       
         start_time = request.POST.get('start_time')
         stop_time = request.POST.get('stop_time')
 
-        # Save the start and stop time to TaskTime model
+       
         if start_time and stop_time:
             TaskTime.objects.create(
                 task=task,
@@ -65,27 +65,27 @@ def update_task(request, task_id):
                 stop_time=stop_time
             )
 
-        # Handle checkbox for marking the task as completed
+        
         if 'is_completed' in request.POST and request.POST['is_completed'] == 'on':
             task.status = "Completed"
 
         task.save()
 
-        return redirect('baseuser')  # Redirect to the task list page
+        return redirect('baseuser')  
 
     latest_time = task.task_times.last()
 
     return render(request, 'employee/update_task.html', {'task': task, 'latest_time': latest_time})
-# View to list all tasks
+
 def emp_task_list(request):
-    # Ensure the user is logged in
+   
     if 'user_reg_no' not in request.session:
         return redirect('login')
 
-    # Get the logged-in user instance
+   
     user_instance = user.objects.get(reg_no=request.session['user_reg_no'])
 
-    # Retrieve GET parameters
+   
     hide_completed = request.GET.get('hide_completed')
     search_query = request.GET.get('search', '').strip()
     status_filter = request.GET.get('status', '')
@@ -96,7 +96,7 @@ def emp_task_list(request):
     due_date = request.GET.get('due_date', '')
     estimated_hours = request.GET.get('estimated_hours', '')
 
-    # Base queryset
+   
     tasks = Task.objects.filter(assigned_to=user_instance)
 
     # Apply filters
@@ -119,14 +119,14 @@ def emp_task_list(request):
     if estimated_hours:
         tasks = tasks.filter(estimated_hours__gte=estimated_hours)
 
-    # Calculate time spent on tasks and get completed time
+   
     for task in tasks:
         total_seconds = sum((entry.stop_time - entry.start_time).total_seconds()
                             for entry in task.task_times.all() if entry.start_time and entry.stop_time)
         task.total_hours = int(total_seconds // 3600)
         task.total_minutes = int((total_seconds % 3600) // 60)
 
-        # Get completed time from the last TaskTime entry if task is completed
+       
         completed_time = task.task_times.filter(stop_time__isnull=False).order_by('-stop_time').first()
         task.completed_time_display = completed_time.stop_time if completed_time else None
 
@@ -145,9 +145,9 @@ def emp_task_list(request):
 
 def employee_dashboard(request):
     if 'user_reg_no' not in request.session:
-        return redirect('login')  # Redirect to login if not authenticated
+        return redirect('login') 
 
-    user_instance = user.objects.get(reg_no=request.session['user_reg_no'])  # Fetch the logged-in user
+    user_instance = user.objects.get(reg_no=request.session['user_reg_no']) 
     return render(request, 'employee/employee_dashboard.html', {'user': user_instance})
 
 
@@ -156,7 +156,7 @@ from django.utils import timezone
 
 def baseuser(request):
     if 'user_reg_no' not in request.session:
-        return redirect('login')  # Redirect to login if not authenticated
+        return redirect('login') 
 
     user_instance = user.objects.get(reg_no=request.session['user_reg_no'])
     tasks = Task.objects.filter(assigned_to=user_instance)
@@ -166,17 +166,17 @@ def baseuser(request):
     pending_tasks = tasks.filter(status='Pending').count()
     in_progress_tasks = tasks.filter(status='In Progress').count()
 
-    # Assume each working day has 8 hours
+ 
     working_hours_per_day = 8
     total_working_hours = total_tasks * working_hours_per_day
 
-    # Get today's date
+   
     today = timezone.localdate()
 
-    # Filter TaskTime entries for today
+   
     today_task_times = TaskTime.objects.filter(task__assigned_to=user_instance, start_time__date=today)
 
-    # Calculate total hours worked today
+   
     total_seconds_today = sum(
         (entry.stop_time - entry.start_time).total_seconds()
         if entry.stop_time else (timezone.now() - entry.start_time).total_seconds()
@@ -192,7 +192,7 @@ def baseuser(request):
     total_hours_today = int(total_seconds_today // 3600)
     total_minutes_today = int((total_seconds_today % 3600) // 60)
 
-    # Retrieve GET parameters
+  
     hide_completed = request.GET.get('hide_completed')
     search_query = request.GET.get('search', '').strip()
     status_filter = request.GET.get('status', '')
@@ -203,7 +203,7 @@ def baseuser(request):
     due_date = request.GET.get('due_date', '')
     estimated_hours = request.GET.get('estimated_hours', '')
 
-    # Base queryset
+   
     tasks = Task.objects.filter(assigned_to=user_instance)
 
     # Apply filters
@@ -226,7 +226,7 @@ def baseuser(request):
     if estimated_hours:
         tasks = tasks.filter(estimated_hours__gte=estimated_hours)
 
-    # Calculate time spent on tasks
+   
     for task in tasks:
         total_seconds = sum((entry.stop_time - entry.start_time).total_seconds()
                             for entry in task.task_times.all() if entry.start_time and entry.stop_time)
@@ -262,19 +262,19 @@ def baseuser(request):
     return render(request, 'employee/baseuser.html', context)
 
 def logout_view(request):
-    request.session.flush()  # Clear session data
+    request.session.flush() 
     return redirect('login')
 
 
 def employee_projects(request):
-    # Ensure the user is logged in
+   
     if 'user_reg_no' not in request.session:
         return redirect('login')
 
-    # Get the logged-in user instance
+   
     user_instance = user.objects.get(reg_no=request.session['user_reg_no'])
 
-    # Get filter parameters from the request
+   
     status_filter = request.GET.get('status', '')
     priority_filter = request.GET.get('priority', '')
     category_filter = request.GET.get('category', '')
@@ -284,10 +284,10 @@ def employee_projects(request):
     client_filter = request.GET.get('client', '')
     search_query = request.GET.get('search', '')
 
-    # Start with projects assigned to the logged-in employee
+    
     projects = Project.objects.filter(assigned=user_instance)
 
-    # Apply filters if provided
+   
     if status_filter:
         projects = projects.filter(status=status_filter)
     if priority_filter:
@@ -303,18 +303,18 @@ def employee_projects(request):
     if client_filter:  # Filter by client if provided
         projects = projects.filter(client=client_filter)
 
-    # Apply search filter
+    #  search filter
     if search_query:
         projects = projects.filter(
             Q(name__icontains=search_query) |
-            Q(assigned_to__name__icontains=search_query)  # Ensure field name matches your model
+            Q(assigned_to__name__icontains=search_query)  
         ).distinct()
 
-    total_projects = projects.count()  # Count total number of projects
+    total_projects = projects.count() 
 
     clients = Project.objects.values_list('client', flat=True).distinct()
 
-    # Pass current filters to the template for maintaining state
+   
     context = {
         'projects': projects,
         'total_projects': total_projects,
@@ -338,16 +338,16 @@ def project_overview(request, project_id):
     comments = Comment.objects.filter(project=project).order_by('-created_at')
 
     if request.method == 'POST' and request.user.is_authenticated:
-        form = CommentForm(request.POST)  # Instantiate the form with the POST data
-        if form.is_valid():  # Check if the form is valid
-            comment = form.save(commit=False)  # Create a Comment instance, but don't save yet
-            comment.user = request.user  # Assign the current user to the comment
-            comment.project = project  # Assign the current project to the comment
-            comment.save()  # Save the comment to the database
-            return HttpResponseRedirect(request.path)  # Redirect to avoid form resubmission
+        form = CommentForm(request.POST) 
+        if form.is_valid(): 
+            comment = form.save(commit=False) 
+            comment.user = request.user  
+            comment.project = project 
+            comment.save() 
+            return HttpResponseRedirect(request.path)  
         else:
-            print(form.errors)  # Print form validation errors to the console
+            print(form.errors) 
     else:
-        form = CommentForm()  # If it's a GET request, just initialize an empty form
+        form = CommentForm()  
 
     return render(request, 'employee/project_overview.html', {'project': project, 'comments': comments, 'form': form})
