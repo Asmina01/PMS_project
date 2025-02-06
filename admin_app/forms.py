@@ -24,7 +24,7 @@ class ProjectForm(forms.ModelForm):
 
     assigned = forms.ModelMultipleChoiceField(
         queryset=user.objects.all(),
-        widget=forms.CheckboxSelectMultiple,  # This will render a list of checkboxes
+        widget=forms.CheckboxSelectMultiple,  
         label="Assigned Members"
     )
 
@@ -50,7 +50,7 @@ class ProjectForm(forms.ModelForm):
 
         def clean_due_date(self):
             if self.cleaned_data.get('no_deadline'):
-                return None  # If 'No Deadline' is selected, set due_date to None
+                return None 
             return self.cleaned_data.get('due_date')
 
 
@@ -71,14 +71,14 @@ class SprintForm(forms.ModelForm):
 class TaskForm(forms.ModelForm):
     no_deadline = forms.BooleanField(required=False, label="No Deadline for this task", initial=False)
     assigned_to = forms.ModelMultipleChoiceField(
-        queryset=user.objects.all(),  # Assuming User is imported
+        queryset=user.objects.all(),  
         widget=forms.CheckboxSelectMultiple,
         label="Assign to Members"
     )
     client = forms.CharField(
         label="Client",
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control'})  # Removed readonly
+        widget=forms.TextInput(attrs={'class': 'form-control'}) 
     )
 
     class Meta:
@@ -103,7 +103,7 @@ class TaskForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TaskForm, self).__init__(*args, **kwargs)
 
-        # Auto-fill client and assigned users based on selected project
+       
         if 'project' in self.data:
             try:
                 project_id = int(self.data.get('project'))
@@ -111,7 +111,7 @@ class TaskForm(forms.ModelForm):
                 self.fields['client'].initial = (
                     project.client.name if hasattr(project.client, 'name') else project.client
                 )
-                self.fields['assigned_to'].queryset = project.assigned.all()  # Update queryset for assigned users
+                self.fields['assigned_to'].queryset = project.assigned.all()  
             except (ValueError, Project.DoesNotExist):
                 self.fields['client'].initial = "No Client"
         elif self.instance.pk and self.instance.project:
@@ -119,15 +119,15 @@ class TaskForm(forms.ModelForm):
             self.fields['client'].initial = (
                 project.client.name if hasattr(project.client, 'name') else project.client
             )
-            self.fields['assigned_to'].queryset = project.assigned.all()  # Update queryset for assigned users
+            self.fields['assigned_to'].queryset = project.assigned.all() 
 
     def clean_client(self):
-        """Ensure the client field remains unchanged."""
+       
         if self.instance.pk and self.instance.project:
             project = self.instance.project
             return project.client.name if hasattr(project.client, 'name') else project.client
         return self.cleaned_data.get('client')
-# Form for Taskprogress model
+
 class TaskProgressForm(forms.ModelForm):
     class Meta:
         model = Taskprogress
