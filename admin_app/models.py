@@ -3,13 +3,13 @@ from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
 
 class user(models.Model):
-    reg_no = models.CharField(max_length=50, primary_key=True)  # Set primary key explicitly
+    reg_no = models.CharField(max_length=50, primary_key=True)  
     name = models.CharField(max_length=100)
     designation = models.CharField(max_length=100)
     image = models.ImageField(upload_to='images/', blank=True, null=True)
     phone = models.CharField(max_length=15)
     email = models.CharField(max_length=100)
-    password = models.CharField(max_length=255)  # Add password field
+    password = models.CharField(max_length=255)  
 
     ROLE_CHOICES = (
         ('admin', 'Admin'),
@@ -57,7 +57,7 @@ class Project(models.Model):
     ]
 
     name = models.CharField(max_length=100)
-    short_code = models.CharField(max_length=20, unique=True)  # Unique short code
+    short_code = models.CharField(max_length=20, unique=True)  # Unique short cod
     description = models.TextField()
     client = models.CharField(max_length=100)
     category = models.CharField(
