@@ -2,23 +2,22 @@
 {% load static %}
 {% block content %}
 <script>
-    // Select all delete buttons
+   
     const deleteButtons = document.querySelectorAll('.delete-btn');
 
-    // Loop through each delete button
+    
     deleteButtons.forEach((button) => {
         button.addEventListener('click', function(event) {
-            // Prevent the default link behavior
+           
             event.preventDefault();
 
-            // Get the project ID from the data-project-id attribute
+            
             const projectId = this.getAttribute('data-project-id');
 
-            // Set the action URL of the form inside the modal with the correct project ID
             const form = document.getElementById('deleteProjectForm');
-            form.action = `/projects/delete/${projectId}/`;  // Adjust this URL as per your project
+            form.action = `/projects/delete/${projectId}/`;  
 
-            // Show the modal using Bootstrap's Modal constructor
+         
             const myModal = new bootstrap.Modal(document.getElementById('deleteProjectModal'));
             myModal.show();
         });
