@@ -14,7 +14,7 @@ class TaskTime(models.Model):
     def time_spent(self):
         if self.start_time and self.stop_time:
             delta = self.stop_time - self.start_time
-            return delta  # This will return a timedelta object
+            return delta  
         return None
 
 
